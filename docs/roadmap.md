@@ -4,7 +4,7 @@
 
 Convertir AgentLab en una plataforma segura y escalable para centralizar el conocimiento de múltiples productos y permitir consultas, autogestión y operaciones controladas mediante MCP, REST y herramientas internas.
 
-El roadmap prioriza un piloto sobre un LMS basado en Moodle. El piloto comenzará con soporte documental y evolucionará hacia acciones operacionales acotadas, sin habilitar automatizaciones de alto riesgo. Las plataformas internas de gestión del desempeño, capacitación y talento (SGDP) se abordarán posteriormente, debido a su mayor nivel de personalización.
+El roadmap prioriza un piloto sobre un producto representativo de la empresa. El piloto comenzará con soporte documental y evolucionará hacia acciones operacionales acotadas, sin habilitar automatizaciones de alto riesgo. Otros productos se abordarán posteriormente mediante adaptadores específicos, de acuerdo con su nivel de personalización y sus límites de seguridad.
 
 ## Principios de ejecución
 
@@ -26,16 +26,16 @@ Definir el primer caso de uso, las fuentes documentales y el modelo de acceso.
 
 ### Trabajo
 
-- [ ] Confirmar un LMS basado en Moodle como producto piloto.
+- [ ] Confirmar un producto piloto y su responsable técnico.
 - [ ] Seleccionar un flujo de soporte y una operación controlada para evaluar.
 - [ ] Distinguir necesidades del usuario final, del cliente o administrador y del operador.
-- [ ] Confirmar que las mallas curriculares y sus actividades viven en Moodle.
-- [ ] Definir la finalización de un módulo: una actividad con el checkbox de finalización sin marcar se considera pendiente.
-- [ ] Confirmar los tipos de actividades del piloto: recursos, archivos, enlaces, cuestionarios y otros módulos utilizados por la malla.
+- [ ] Inventariar las entidades y estados principales del producto piloto.
+- [ ] Definir los criterios de finalización o estado para el flujo elegido.
+- [ ] Confirmar los tipos de datos y operaciones requeridos por el caso de uso.
 - [ ] Definir Slack como canal inicial del bot.
 - [ ] Excluir la convalidación automática del MVP inicial.
 - [ ] Inventariar manuales y fuentes existentes.
-- [ ] Inventariar las capacidades de integración disponibles en Moodle, como API o web services.
+- [ ] Inventariar las capacidades de integración disponibles en el producto, como APIs, eventos o servicios internos.
 - [ ] Confirmar formatos: Markdown, PDF, HTML, wiki u otros.
 - [ ] Identificar propietarios de la documentación.
 - [ ] Clasificar información pública, interna, confidencial y restringida.
@@ -134,7 +134,7 @@ Hacer que los agentes consuman capacidades sin conocer la implementación concre
 
 El mismo agente puede consumir una capacidad mediante MCP, REST o Python sin modificar su lógica de negocio.
 
-Los adaptadores operacionales podrán implementarse como servicios independientes. El primer caso será un Moodle Bridge en Rust, consumido por AgentLab mediante REST o MCP.
+Los adaptadores operacionales podrán implementarse como servicios independientes cuando existan razones de aislamiento, propiedad o escalabilidad. Cada adaptador será consumido por AgentLab mediante REST o MCP bajo un contrato común.
 
 ## Fase 5 — Identidad, políticas y seguridad
 
@@ -147,7 +147,7 @@ Convertir el acceso a conocimiento y herramientas en una decisión explícita y 
 - [ ] Integrar un proveedor OIDC/OAuth.
 - [ ] Propagar la identidad del usuario hasta la recuperación.
 - [ ] Definir scopes y políticas por producto y versión.
-- [ ] Resolver permisos mediante roles y capabilities de Moodle en su contexto, no mediante la tabla `mdl_user` por sí sola.
+- [ ] Resolver permisos mediante las identidades, roles y políticas del producto en su contexto, no mediante una única tabla o atributo aislado.
 - [ ] Implementar denegación por defecto.
 - [ ] Validar audiencias de tokens MCP.
 - [ ] Evitar token passthrough no controlado.
@@ -161,31 +161,31 @@ Convertir el acceso a conocimiento y herramientas en una decisión explícita y 
 
 Una consulta no autorizada es rechazada antes de recuperar datos y existe evidencia suficiente para reconstruir una ejecución.
 
-## Fase 6 — Piloto AgentLab + Moodle
+## Fase 6 — Piloto AgentLab + producto seleccionado
 
 ### Objetivo
 
-Validar el valor de negocio con un flujo limitado y verificable sobre un LMS basado en Moodle.
+Validar el valor de negocio con un flujo limitado y verificable sobre el producto seleccionado.
 
 ### Trabajo
 
 - [ ] Crear el agente de soporte en Python dentro de AgentLab.
-- [ ] Implementar el Moodle Bridge como servicio independiente en Rust.
-- [ ] Permitir consultas sobre un único LMS y sus manuales asociados.
-- [ ] Consultar el estado de matrícula de un usuario.
-- [ ] Consultar la fecha de matrícula y el curso o programa asociado.
-- [ ] Consultar las notas o calificaciones disponibles.
-- [ ] Identificar cursos o módulos pendientes según la malla correspondiente.
+- [ ] Implementar el adaptador del producto seleccionado.
+- [ ] Permitir consultas sobre un único producto y sus manuales asociados.
+- [ ] Consultar el estado de una entidad autorizada.
+- [ ] Consultar fechas, estados y relaciones relevantes del producto.
+- [ ] Consultar los datos de negocio permitidos por el caso de uso.
+- [ ] Identificar registros o tareas pendientes según las reglas documentadas.
 - [ ] Probar la interacción del bot mediante Slack.
-- [ ] Permitir que un usuario consulte y edite únicamente la información de su propio perfil.
-- [ ] Permitir la consulta de notas o datos personales de terceros solo cuando el rol y las capacidades de Moodle lo autoricen.
+- [ ] Permitir que un usuario consulte y edite únicamente la información autorizada por su contexto.
+- [ ] Permitir la consulta de datos de terceros solo cuando el rol y las políticas del producto lo autoricen.
 - [ ] Recuperar información usando Knowledge MCP.
 - [ ] Exigir respuesta con citas.
 - [ ] Responder explícitamente cuando no exista evidencia suficiente.
 - [ ] Añadir una capacidad de autogestión de bajo riesgo para usuarios o clientes.
-- [ ] Añadir una operación controlada para el cliente o el operador, como validar y matricular usuarios.
+- [ ] Añadir una operación controlada para el cliente o el operador, como validar y actualizar registros.
 - [ ] Permitir solicitudes masivas mediante un archivo solo después de validar su estructura y contenido.
-- [ ] Mostrar una previsualización y solicitar confirmación antes de modificar Moodle.
+- [ ] Mostrar una previsualización y solicitar confirmación antes de modificar datos del producto.
 - [ ] Mantener fuera del MVP la aplicación automática de reglas de convalidación.
 - [ ] Registrar permisos, validaciones, cambios, errores y excepciones.
 - [ ] Registrar las fuentes usadas.
@@ -194,7 +194,7 @@ Validar el valor de negocio con un flujo limitado y verificable sobre un LMS bas
 
 ### Criterio de salida
 
-El agente resuelve un conjunto de preguntas reales con respuestas fundamentadas y ejecuta una operación acotada sobre Moodle con permisos, confirmación y auditoría.
+El agente resuelve un conjunto de preguntas reales con respuestas fundamentadas y ejecuta una operación acotada sobre el producto con permisos, confirmación y auditoría.
 
 ## Fase 7 — Evaluación y seguridad adversarial
 
@@ -222,7 +222,7 @@ Medir si el sistema es útil, seguro y reproducible antes de escalarlo.
 
 Existe un informe reproducible de calidad, seguridad, coste y rendimiento, con riesgos conocidos y decisiones de aceptación.
 
-## Fase 8 — Escalado y extensión a sistemas personalizados
+## Fase 8 — Escalado y extensión a productos personalizados
 
 ### Objetivo
 
@@ -235,8 +235,8 @@ Ampliar la plataforma sin perder aislamiento ni control.
 - [ ] Separar Knowledge MCP de Product Operations MCP.
 - [ ] Añadir herramientas operacionales de solo lectura.
 - [ ] Incorporar acciones con aprobación humana.
-- [ ] Extender el enfoque a sistemas SGDP mediante adaptadores específicos.
-- [ ] Documentar diferencias de permisos, datos y workflows entre Moodle y cada SGDP.
+- [ ] Extender el enfoque a otros productos mediante adaptadores específicos.
+- [ ] Documentar diferencias de permisos, datos y workflows entre el producto piloto y cada nueva integración.
 - [ ] Añadir workflows multiagente.
 - [ ] Añadir despliegue horizontal e ingestion asíncrona.
 - [ ] Integrar alertas y SIEM.
@@ -251,20 +251,20 @@ Los nuevos productos pueden integrarse mediante configuración y conectores sin 
 El primer entregable debería ser pequeño pero completo:
 
 ```text
-1 LMS basado en Moodle
-1 conjunto de manuales del LMS
+1 producto piloto
+1 conjunto de manuales del producto
 1 Knowledge MCP
 1 agente de soporte en Python
-1 Moodle Bridge en Rust
+1 adaptador operacional del producto
 1 API FastAPI
 1 modelo de permisos
 1 sistema de citas
-Consultas de matrícula, fechas, notas y módulos pendientes
+Consultas de estados, fechas, datos autorizados y pendientes
 1 operación controlada con confirmación
 1 conjunto de evaluaciones
 ```
 
-No se deberían añadir todavía acciones arbitrarias, operaciones irreversibles, convalidación automática ni integraciones con SGDP altamente personalizados.
+No se deberían añadir todavía acciones arbitrarias, operaciones irreversibles ni integraciones altamente personalizadas.
 
 ## Métricas de éxito
 
@@ -293,8 +293,8 @@ No se deberían añadir todavía acciones arbitrarias, operaciones irreversibles
 | Herramientas demasiado poderosas | Contratos estrechos, allowlist y solo lectura inicial |
 | Costes impredecibles | Límites de tokens, pasos, tiempo y presupuesto |
 | Falta de evidencia | Auditoría, trazas y citas obligatorias |
-| Operaciones incorrectas sobre Moodle | Bridge con contratos estrechos, validación, previsualización y confirmación |
-| Integraciones SGDP demasiado personalizadas | Adaptadores específicos y extensión posterior al piloto |
+| Operaciones incorrectas sobre un producto | Adaptador con contratos estrechos, validación, previsualización y confirmación |
+| Integraciones demasiado personalizadas | Adaptadores específicos y extensión posterior al piloto |
 | Incumplimiento normativo | Matriz legal por país, sector y tipo de dato |
 
 ## Definición de listo para producción

@@ -78,26 +78,24 @@ flowchart TB
     APPROVAL --> TOOLS
     TOOLS --> ADAPTERS[Tool Adapters]
     ADAPTERS --> EXT[APIs / servicios externos]
-    ADAPTERS --> MOODLE_BRIDGE[Rust Moodle Bridge]
-    MOODLE_BRIDGE --> MOODLE[Moodle / LMS]
     ORCH <--> STATE[(PostgreSQL Checkpoints)]
     ORCH <--> CACHE[(Redis)]
     API --> TRACE[Execution Traces]
 ```
 
-### Decisión de lenguajes e integración con Moodle
+### Decisión de lenguajes e integraciones operacionales
 
 AgentLab utilizará un enfoque híbrido. Python será el lenguaje principal para la API, la orquestación con LangGraph, los agentes, la recuperación aumentada y la experimentación con modelos de lenguaje. Esta elección favorece la velocidad de desarrollo y el ecosistema disponible para workflows agentic.
 
-Las integraciones operacionales que requieran mayor control de concurrencia, validación y eficiencia podrán implementarse como servicios independientes en Rust. El primer caso será un **Moodle Bridge**, responsable de comunicarse con Moodle, validar operaciones y exponerlas a AgentLab mediante REST o MCP.
+Las integraciones operacionales que requieran mayor control de concurrencia, validación y eficiencia podrán implementarse como servicios independientes. Cada integración debe exponer capacidades estrechas, validar operaciones y conectarse a AgentLab mediante REST o MCP.
 
 La separación prevista es:
 
 ```text
 AgentLab en Python
   → Tool Registry / MCP Gateway
-  → Moodle Bridge en Rust
-  → API o web services de Moodle
+  → Adaptador operacional del producto
+  → API o interfaz aprobada del cliente
 ```
 
 El bridge no expondrá operaciones genéricas ni acceso arbitrario. Sus capacidades serán explícitas, estarán sujetas a permisos y deberán registrar las solicitudes, validaciones, confirmaciones y resultados. El primer vertical slice podrá comenzar con una operación controlada, como validar y matricular usuarios desde un archivo, antes de incorporar otras acciones.
@@ -120,7 +118,7 @@ El bridge no expondrá operaciones genéricas ni acceso arbitrario. Sus capacida
 | Componente | Tecnología | Responsabilidad |
 |---|---|---|
 | Lenguaje principal | Python | API, agentes, orquestación, RAG y workflows |
-| Integraciones operacionales | Rust | Moodle Bridge, validaciones y operaciones concurrentes |
+| Integraciones operacionales | Adaptadores independientes | Integración con APIs y servicios aprobados del cliente |
 | API | FastAPI | Endpoints y gestión de ejecuciones |
 | Orquestación | LangGraph | Estado, nodos y transiciones |
 | Validación | Pydantic | Contratos de entrada y salida |
@@ -151,8 +149,7 @@ agent-lab/
 │       ├── integration/
 │       └── scenarios/
 ├── frontend/
-├── integrations/
-│   └── moodle-bridge/          # Servicio Rust para integración operacional con Moodle
+├── integrations/               # Adaptadores operacionales por producto o cliente
 ├── examples/
 │   ├── repository-mapper/        # Fixture, scope y propuesta de herramienta
 │   ├── single-agent/
@@ -190,9 +187,9 @@ scope → grafo determinista → propuesta con evidencia → validación → apr
 ```
 
 El mapper solo analiza el subconjunto configurado del repositorio. Por ejemplo, el scope
-de muestra incluye `examples/repository-mapper/sample-repo/**` y excluye `moodle/**`,
-`vendor/**`, `node_modules/**` y contenido generado. Esto permite mapear el portal que
-construye el equipo sin graficar todo el core de Moodle.
+de muestra incluye `examples/repository-mapper/sample-repo/**` y excluye `framework-core/**`,
+`vendor/**`, `node_modules/**` y contenido generado. Esto permite mapear el producto que
+construye el equipo sin graficar componentes genéricos o irrelevantes.
 
 Para probarlo localmente:
 

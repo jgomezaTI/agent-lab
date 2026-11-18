@@ -3,7 +3,7 @@ product_id = "sample-portal"
 environment = "local"
 include = ["examples/repository-mapper/sample-repo/**"]
 exclude = [
-  "moodle/**",
+  "framework-core/**",
   "vendor/**",
   "node_modules/**",
   "generated/**",

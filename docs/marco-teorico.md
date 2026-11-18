@@ -19,7 +19,7 @@ La propuesta parte de una realidad empresarial frecuente:
 
 Sin una capa común, cada agente termina implementando sus propias integraciones, reglas de acceso, búsquedas y mecanismos de auditoría. Esto provoca duplicación, dificultad para mantener la documentación actualizada y riesgo de que un agente acceda a información que no le corresponde.
 
-Además, en plataformas de capacitación y otros productos empresariales, una parte importante de la operación consiste en resolver solicitudes recurrentes: consultar información, actualizar datos básicos, crear cursos, matricular usuarios o aplicar cambios masivos. Estas tareas no siempre requieren el criterio especializado de un operador, pero sí exigen acceso controlado al sistema y una ejecución trazable. El desafío, por tanto, no es solamente responder preguntas, sino habilitar distintos grados de autogestión sin perder control sobre las acciones realizadas.
+Además, en productos empresariales, una parte importante de la operación consiste en resolver solicitudes recurrentes: consultar información, actualizar datos básicos, gestionar registros o aplicar cambios masivos. Estas tareas no siempre requieren el criterio especializado de un operador, pero sí exigen acceso controlado al sistema y una ejecución trazable. El desafío, por tanto, no es solamente responder preguntas, sino habilitar distintos grados de autogestión sin perder control sobre las acciones realizadas.
 
 AgentLab debe separar claramente cinco responsabilidades:
 
@@ -93,10 +93,10 @@ flowchart TB
     ORCH --> AGENTS[Agentes especializados]
     AGENTS --> GATEWAY
     GATEWAY --> POLICY[Identity + Policy Enforcement]
-    GATEWAY --> MOODLE_BRIDGE[Moodle Bridge / API]
-    MOODLE_BRIDGE --> MOODLE[LMS basado en Moodle]
-    GATEWAY -.-> SGDP_BRIDGE[Adaptadores futuros para SGDP]
-    SGDP_BRIDGE -.-> SGDP[SGDP internos personalizados]
+    GATEWAY --> PRODUCT_ADAPTERS[Adaptadores de productos]
+    PRODUCT_ADAPTERS --> PRODUCT_APIS[APIs e interfaces aprobadas]
+    GATEWAY -.-> CUSTOM_BRIDGE[Adaptadores futuros]
+    CUSTOM_BRIDGE -.-> CUSTOM_SYSTEMS[Sistemas personalizados]
     POLICY --> AUDIT[Audit Log + Traces]
     ORCH <--> STATE[(PostgreSQL State)]
     ORCH <--> CACHE[(Redis)]
@@ -129,7 +129,7 @@ Un MCP independiente por producto se justificaría cuando existan diferencias im
 
 Los servidores MCP operacionales deben mantenerse separados del servidor de conocimiento. Consultar un manual y ejecutar una acción sobre un producto son capacidades con riesgos diferentes.
 
-Esta separación también permite avanzar por etapas. Un LMS basado en Moodle constituye un punto de partida razonable porque normalmente ofrece mecanismos de integración y una estructura de operación relativamente estandarizada. En cambio, los sistemas internos de gestión del desempeño, capacitación y talento (SGDP) pueden estar altamente personalizados y requerir adaptadores, permisos y workflows específicos para cada cliente. La experiencia obtenida con el LMS puede reutilizarse como base conceptual, pero no debe asumirse que la integración con los SGDP tendrá la misma complejidad o el mismo modelo de datos.
+Esta separación también permite avanzar por etapas. Cada producto puede incorporarse mediante un adaptador específico, con sus propios contratos, permisos y workflows, sin convertir las reglas de un producto en supuestos de toda la plataforma. La experiencia obtenida con un producto piloto debe reutilizarse como patrón técnico, no como modelo de datos universal para los demás productos.
 
 ## 6. Relación entre agentes y MCP
 
@@ -245,17 +245,17 @@ La aplicabilidad concreta debe revisarse con seguridad, privacidad, legal y cump
 
 ## 11. Alcance inicial recomendado y evolución del piloto
 
-El primer piloto debería concentrarse en un único LMS basado en Moodle y en un conjunto acotado de casos de uso. El objetivo no sería construir desde el inicio una solución para todos los productos, sino validar un puente de integración con la plataforma y comprobar cómo un agente puede combinar conocimiento, permisos y acciones controladas.
+El primer piloto debería concentrarse en un único producto y en un conjunto acotado de casos de uso. El objetivo no sería construir desde el inicio una solución para todos los productos, sino validar un adaptador de integración y comprobar cómo un agente puede combinar conocimiento, permisos y acciones controladas.
 
 El piloto podría evolucionar en tres niveles:
 
 1. Consultas sobre un único producto, filtradas por versión, cliente y permisos, con respuestas fundamentadas en la documentación disponible.
 2. Funciones de autogestión de bajo riesgo para usuarios y clientes, como la actualización de determinados datos o la gestión de solicitudes frecuentes, aplicando controles adicionales a cualquier operación relacionada con credenciales.
-3. Operaciones asistidas para clientes u operadores, como crear cursos, matricular usuarios o asignarlos a grupos. Las solicitudes masivas podrían recibirse mediante un archivo o una instrucción estructurada, validarse y presentarse para confirmación antes de su ejecución.
+3. Operaciones asistidas para clientes u operadores, como administrar registros o ejecutar acciones acotadas sobre entidades del producto. Las solicitudes masivas podrían recibirse mediante un archivo o una instrucción estructurada, validarse y presentarse para confirmación antes de su ejecución.
 
 Cada ejecución debería registrar quién solicitó la acción, qué se validó, qué cambios se realizaron y qué elementos quedaron pendientes o rechazados. Esto permitiría medir, además de la calidad de las respuestas, la reducción de trabajo operativo y la capacidad del sistema para derivar excepciones a un operador.
 
-Una vez validado este enfoque en Moodle, la solución podría extenderse a los SGDP internos. Debido a su alto nivel de personalización, esta segunda etapa debería abordarse mediante adaptadores y workflows específicos, sin asumir que las capacidades, permisos y reglas del LMS se pueden trasladar directamente.
+Una vez validado este enfoque en el producto piloto, la solución podría extenderse a otros productos. Debido a su posible nivel de personalización, cada nueva integración debería abordarse mediante adaptadores y workflows específicos, sin asumir que las capacidades, permisos y reglas del primer producto se pueden trasladar directamente.
 
 ## Referencias
 

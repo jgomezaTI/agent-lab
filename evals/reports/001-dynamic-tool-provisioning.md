@@ -6,7 +6,7 @@ Date: 2026-11-18
 
 | Check | Result | Evidence |
 |---|---|---|
-| Scoped mapper scan | PASS | `graph_5fa7294cf0347fdc`, 7 nodes, 7 relationships |
+| Scoped mapper scan | PASS | `graph_94e1147fac50da67`, 7 nodes, 7 relationships |
 | Graph CLI validation | PASS | `valid` |
 | Graph explanation | PASS | 7 nodes, 7 relationships, no errors |
 | Mapper unit/integration suite | PASS | 6 tests with `unittest` |
@@ -19,7 +19,7 @@ Date: 2026-11-18
 
 ## Observed behavior
 
-- The sample scope includes the portal fixture and excludes `moodle/**`.
+- The sample scope includes the product fixture and excludes `framework-core/**`.
 - The mapper does not import or execute inspected source files.
 - A Spanish request for “notas de curso” resolves to the synthetic `get_course_grades`
   proposal through explicit query aliases; unresolved requests retain assumptions.
