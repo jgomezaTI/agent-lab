@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentlab.local/contracts/application-graph.schema.json",
+  "title": "Application Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["graph_id", "repository", "scope", "nodes", "relationships", "generated_at", "analyzer"],
+  "properties": {
+    "graph_id": { "type": "string", "minLength": 8 },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "commit"],
+      "properties": {
+        "root": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "minLength": 1 },
+        "is_dirty": { "type": "boolean" }
+      }
+    },
+    "scope": { "$ref": "repository-scope.schema.json" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "label", "path"],
+        "properties": {
+          "id": { "type": "string", "minLength": 8 },
+          "kind": { "enum": ["repository", "module", "file", "endpoint", "model", "schema", "dependency", "permission", "test", "configuration"] },
+          "label": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source", "target", "kind"],
+        "properties": {
+          "id": { "type": "string", "minLength": 8 },
+          "source": { "type": "string", "minLength": 8 },
+          "target": { "type": "string", "minLength": 8 },
+          "kind": { "enum": ["contains", "imports", "calls", "exposes", "reads", "writes", "depends_on", "authorized_by", "tested_by", "configures"] },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "analyzer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "configuration_hash"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "configuration_hash": { "type": "string", "minLength": 8 }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentlab-foundation"
+version = "0.1.0"
+description = "Repository-guided agent and tool provisioning foundations"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+repository-mapper = "repository_mapper.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["packages/repository-mapper/src"]
+
+[tool.pytest.ini_options]
+testpaths = ["packages/repository-mapper/tests", "backend/tests"]
+pythonpath = ["packages/repository-mapper/src", "."]

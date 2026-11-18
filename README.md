@@ -2,7 +2,7 @@
 
 > Framework modular para construir, orquestar y evaluar agentes de inteligencia artificial que utilizan herramientas externas.
 
-**Estado:** planificación / arquitectura inicial  
+**Estado:** foundation vertical slice implementado / arquitectura en evolución
 **Tipo:** portfolio project · Agentic AI · Backend Engineering
 
 AgentLab explorará cómo diseñar sistemas de agentes que puedan descomponer objetivos, seleccionar herramientas, ejecutar acciones y verificar resultados. El foco estará en la orquestación controlada y observable, no solamente en mantener una conversación con un modelo de lenguaje.
@@ -78,10 +78,29 @@ flowchart TB
     APPROVAL --> TOOLS
     TOOLS --> ADAPTERS[Tool Adapters]
     ADAPTERS --> EXT[APIs / servicios externos]
+    ADAPTERS --> MOODLE_BRIDGE[Rust Moodle Bridge]
+    MOODLE_BRIDGE --> MOODLE[Moodle / LMS]
     ORCH <--> STATE[(PostgreSQL Checkpoints)]
     ORCH <--> CACHE[(Redis)]
     API --> TRACE[Execution Traces]
 ```
+
+### Decisión de lenguajes e integración con Moodle
+
+AgentLab utilizará un enfoque híbrido. Python será el lenguaje principal para la API, la orquestación con LangGraph, los agentes, la recuperación aumentada y la experimentación con modelos de lenguaje. Esta elección favorece la velocidad de desarrollo y el ecosistema disponible para workflows agentic.
+
+Las integraciones operacionales que requieran mayor control de concurrencia, validación y eficiencia podrán implementarse como servicios independientes en Rust. El primer caso será un **Moodle Bridge**, responsable de comunicarse con Moodle, validar operaciones y exponerlas a AgentLab mediante REST o MCP.
+
+La separación prevista es:
+
+```text
+AgentLab en Python
+  → Tool Registry / MCP Gateway
+  → Moodle Bridge en Rust
+  → API o web services de Moodle
+```
+
+El bridge no expondrá operaciones genéricas ni acceso arbitrario. Sus capacidades serán explícitas, estarán sujetas a permisos y deberán registrar las solicitudes, validaciones, confirmaciones y resultados. El primer vertical slice podrá comenzar con una operación controlada, como validar y matricular usuarios desde un archivo, antes de incorporar otras acciones.
 
 ### Flujo de ejecución
 
@@ -100,7 +119,8 @@ flowchart TB
 
 | Componente | Tecnología | Responsabilidad |
 |---|---|---|
-| Lenguaje | Python | Implementación de agentes |
+| Lenguaje principal | Python | API, agentes, orquestación, RAG y workflows |
+| Integraciones operacionales | Rust | Moodle Bridge, validaciones y operaciones concurrentes |
 | API | FastAPI | Endpoints y gestión de ejecuciones |
 | Orquestación | LangGraph | Estado, nodos y transiciones |
 | Validación | Pydantic | Contratos de entrada y salida |
@@ -131,15 +151,26 @@ agent-lab/
 │       ├── integration/
 │       └── scenarios/
 ├── frontend/
+├── integrations/
+│   └── moodle-bridge/          # Servicio Rust para integración operacional con Moodle
 ├── examples/
+│   ├── repository-mapper/        # Fixture, scope y propuesta de herramienta
 │   ├── single-agent/
 │   └── multi-agent/
 ├── evals/
 │   ├── datasets/
 │   └── reports/
 ├── docs/
-│   ├── architecture/
+│   ├── architecture/             # Separación control/runtime y límites de seguridad
 │   └── adr/
+├── packages/
+│   └── repository-mapper/         # Mapper estático y CLI portable
+├── skills/
+│   └── repository-mapper/         # Skill reutilizable por Codex/Cursor/Claude
+├── contracts/                    # Copias runtime de los contratos JSON
+├── .agents/
+│   └── skills/                  # Skills de GitHub Spec Kit para Codex
+├── .specify/                    # Templates, workflows y configuración SDD
 ├── infrastructure/
 ├── .github/
 │   └── workflows/
@@ -147,6 +178,57 @@ agent-lab/
 ├── .env.example
 └── README.md
 ```
+
+## Repository mapper y provisión dinámica
+
+El primer vertical slice implementa el flujo que permite conectar un agente de código al
+repositorio sin convertirlo en una dependencia del runtime del cliente:
+
+```text
+scope → grafo determinista → propuesta con evidencia → validación → aprobación
+      → registro de capacidad → MCP/REST → conector aprobado del cliente
+```
+
+El mapper solo analiza el subconjunto configurado del repositorio. Por ejemplo, el scope
+de muestra incluye `examples/repository-mapper/sample-repo/**` y excluye `moodle/**`,
+`vendor/**`, `node_modules/**` y contenido generado. Esto permite mapear el portal que
+construye el equipo sin graficar todo el core de Moodle.
+
+Para probarlo localmente:
+
+```bash
+PYTHONPATH=packages/repository-mapper/src \
+python -m repository_mapper scan \
+  --scope configs/repository-scope.example.toml \
+  --repository . \
+  --output .agentlab/graph.json
+
+PYTHONPATH=packages/repository-mapper/src \
+python -m repository_mapper validate .agentlab/graph.json
+
+PYTHONPATH=packages/repository-mapper/src \
+python -m repository_mapper explain .agentlab/graph.json
+```
+
+La propuesta de `get_course_grades` es un artefacto de diseño; no consulta datos reales ni
+publica código automáticamente. El runtime de soporte solo descubre capacidades activas
+compatibles con el cliente, producto, entorno y permisos del actor. La explicación
+completa está en [provisión dinámica](docs/architecture/dynamic-tool-provisioning.md) y
+los límites de seguridad en [security boundaries](docs/architecture/security-boundaries.md).
+
+## Desarrollo guiado por especificaciones
+
+El repositorio utiliza [GitHub Spec Kit](https://github.com/github/spec-kit) con integración para Codex. Las skills se encuentran en `.agents/skills/` y la configuración, templates y workflows en `.specify/`. Para iniciar una funcionalidad, sigue este flujo desde Codex:
+
+```text
+$speckit-constitution   # establecer principios del proyecto
+$speckit-specify        # redactar la especificación
+$speckit-plan           # definir la solución técnica
+$speckit-tasks          # descomponer el trabajo
+$speckit-implement      # ejecutar la implementación
+```
+
+Usa `$speckit-clarify`, `$speckit-analyze` y `$speckit-checklist` cuando necesites reducir ambigüedad o validar la coherencia de los artefactos.
 
 ## Escenarios de demostración
 
@@ -194,12 +276,29 @@ Las métricas se reportarán junto con los casos de prueba, modelo utilizado y c
 
 ## Desarrollo local
 
-Las instrucciones ejecutables se añadirán cuando se implemente el primer vertical slice. Actualmente el repositorio contiene el diseño inicial, no una versión funcional.
+El vertical slice se puede ejecutar sin credenciales, MCP remoto ni datos de clientes.
+Pytest está declarado como dependencia opcional; mientras no se instalen dependencias, la
+misma suite puede ejecutarse con la librería estándar:
+
+```bash
+PYTHONPATH=packages/repository-mapper/src:. \
+python -m unittest discover -s packages/repository-mapper/tests -v
+
+PYTHONPATH=packages/repository-mapper/src:. \
+python -m unittest discover -s backend/tests -v
+```
+
+La integración de identidad, secretos, persistencia, conectores reales y publicación
+remota queda deliberadamente como siguiente fase.
 
 ## Documentación
 
 - Arquitectura: `docs/architecture/`
 - Decisiones técnicas: `docs/adr/`
+- [Marco teórico y arquitectura conceptual](docs/marco-teorico.md)
+- [Roadmap de AgentLab](docs/roadmap.md)
+- [Arquitectura de provisión dinámica](docs/architecture/dynamic-tool-provisioning.md)
+- [Límites de seguridad](docs/architecture/security-boundaries.md)
 - Escenarios: `examples/`
 - Evaluaciones: `evals/`
 

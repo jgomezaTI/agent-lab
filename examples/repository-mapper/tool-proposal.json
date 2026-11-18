@@ -1,0 +1,38 @@
+{
+  "proposal_id": "proposal_fixture_grades",
+  "name": "get_course_grades",
+  "description": "Read course grades through a customer-approved read-only interface.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "course_id": { "type": "string" }
+    },
+    "required": ["course_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "customer_id": { "type": "string" },
+      "course_id": { "type": "string" },
+      "grades": { "type": "array" }
+    },
+    "required": ["customer_id", "course_id", "grades"]
+  },
+  "permissions": ["grades:read"],
+  "data_sources": [
+    {
+      "customer_id": "customer-a",
+      "product_id": "portal",
+      "interface": "approved_read_only_interface"
+    }
+  ],
+  "risk_level": "read_only",
+  "graph_references": ["node_grades"],
+  "assumptions": ["The runtime connector must implement the approved interface for customer-a."],
+  "lifecycle_state": "draft",
+  "provenance": {
+    "graph_id": "graph_fixture",
+    "source_commit": "commit-1",
+    "request_id": "request_fixture"
+  }
+}

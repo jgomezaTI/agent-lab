@@ -1,0 +1,18 @@
+scope_id = "sample-portal-scope"
+product_id = "sample-portal"
+environment = "local"
+include = ["examples/repository-mapper/sample-repo/**"]
+exclude = [
+  "moodle/**",
+  "vendor/**",
+  "node_modules/**",
+  "generated/**",
+  "**/.venv/**"
+]
+languages = ["python", "typescript", "sql"]
+ignore_hidden = true
+follow_symlinks = false
+
+[analysis]
+max_file_size_bytes = 1000000
+detect_tests = true

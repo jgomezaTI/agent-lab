@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentlab.local/contracts/capability-registry.schema.json",
+  "title": "Capability Registry Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capability_id", "name", "artifact_id", "customer_id", "product_id", "permissions", "transport", "status"],
+  "properties": {
+    "capability_id": { "type": "string", "minLength": 8 },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+    "artifact_id": { "type": "string", "minLength": 8 },
+    "customer_id": { "type": "string", "minLength": 1 },
+    "product_id": { "type": "string", "minLength": 1 },
+    "environment": { "enum": ["local", "sandbox", "staging", "production"] },
+    "permissions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "transport": { "enum": ["mcp", "rest"] },
+    "status": { "enum": ["pending", "active", "failed", "revoked", "deprecated"] },
+    "source_commit": { "type": "string", "minLength": 1 },
+    "graph_id": { "type": "string", "minLength": 8 },
+    "deprecation_reason": { "type": "string" }
+  }
+}
